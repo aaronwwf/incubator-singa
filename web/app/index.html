@@ -22,7 +22,6 @@
     <![endif]-->
 
 
-    <div class="container">
       <div class="header">
         <ul class="nav nav-pills pull-right">
           <li class="active config"><a href="#" id="submitForm">submit</a></li>
@@ -33,26 +32,20 @@
         <h3 class="text-muted">SINGA Configuration</h3>
       </div>
 
-
-
-      <div id="config" class="row config">
-        <div class="col-lg-8">
-          <div id="form">
-
-
-          </div>
+      <div id="content" class="row">
+        <div class="col-md-2 first">
 
         </div>
-        <div class="col-lg-4" id="value">
-
+        <div class="col-md-2 second" >
 
         </div>
-      </div>
+        <div class="col-md-2 third" >
 
-      <div id="monitor">
-        <div id="chart" class="row monitor">
         </div>
-        <div  id="pic" class="row monitor">
+        <div class="col-md-2 forth" >
+
+        </div>
+        <div class="col-md-4 layer_net" >
 
         </div>
       </div>
@@ -60,8 +53,6 @@
       <div class="footer">
         <p><span class="glyphicon glyphicon-heart"></span> SINGA, By NUS </p>
       </div>
-
-    </div>
 
     <div class="modal fade" id="uploadModal"  role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
@@ -111,19 +102,15 @@
     </script>
     <script type="text/x-handlebars" id='textTemplate' >
 
-      <div class="form-group field_{{name}} {{#unless isRequired}}optional{{/unless}}">
-        <p class="title">{{#if isRequired}}<span class="required">*</span>{{/if}}{{name}}
-          <button class="add-btn btn btn-primary"  >add</button>
-          <button class="remove-btn btn btn-primary" >remove</button>
-          <span class="comment" title="{{comment}}">{{trimString50 comment}}</span>
-        </p>
-        <input type="text"  class="form-control" aria-describedby="helpBlock" value="{{defaultValue}}"/>
+      <div class="form-group field_{{id}}">
+
+        <input type="text"  class="form-control" aria-describedby="helpBlock" value="{{value}}"/>
       </div>
     </script>
 
     <script type="text/x-handlebars" id='selectTemplate' >
 
-      <div class="form-group field_{{name}} {{#unless isRequired}}optional{{/unless}}">
+      <div class="form-group field_{{id}}">
 
           <p class="title" >{{#if isRequired}}<span class="required">*</span>{{/if}}{{name}}
             <button class="add-btn btn btn-primary"  >add</button>
@@ -133,26 +120,47 @@
           <select class="form-control">
             <option value="">please select</option>
             {{#each _enum.values}}
-            <option value="{{value}}" title="{{comment}}">{{key}}</option>
+            <option value="{{key}}" title="{{comment}}" >{{key}}</option>
             {{/each}}
           </select>
       </div>
     </script>
     <script type="text/x-handlebars" id='messageTemplate' >
-      <div class="form-group field_{{name}} {{#unless isRequired}}optional{{/unless}}">
-        <p  class="title">
-          {{#if isRequired}}<span class="required">*</span>{{/if}}{{name}}
-          <button class="toggle-btn btn btn-primary">show</button>
-          <button class="add-btn btn btn-primary" >add</button>
-          <button class="remove-btn btn btn-primary" >remove</button>
-          <button class="toggle-optional-btn btn btn-primary">show optional</button>
-          <span class="comment" title="{{comment}}">{{trimString50 comment}}</span>
+      <div class="message">
+          <h4>
+            {{def.name}}
+            <span class="hide-btn action glyphicon glyphicon-remove" aria-hidden="true" ></span>
+            <span class="edit-btn action glyphicon glyphicon-pencil" aria-hidden="true" ></span>
+            <span class="done-btn action glyphicon glyphicon-ok" aria-hidden="true" style="display:none"></span>
+          </h4>
+          <div class="detail">
+            <p class="comment">{{def.comment}}</p>
+            {{#each fields}}
+            <div class="field_{{id}}">
+              {{#if isMessage}}
+                <p class="show-btn"  data-toggle="tooltip" data-placement="right"  title="{{def.comment}}" _id="{{id}}">
+                  <span class="glyphicon glyphicon-eye-open" aria-hidden="true" _id="{{id}}"></span>&nbsp;
+                  {{def.name}}
+                  {{#if isRequired}}<span class="required">*</span>{{/if}}
+                  {{#if isRepeated}}
+                    <span class="plus-btn glyphicon glyphicon-plus" aria-hidden="true"></span>
+                    <span class="minus-btn glyphicon glyphicon-minus" aria-hidden="true"></span>
+                  {{/if}}
+                </p>
+              {{else}}
+                <span type="button" data-toggle="tooltip" data-placement="right"  title="{{def.comment}}">{{def.name}}</span>
+                {{#if isRequired}}<span class="required">*</span>{{/if}}
+                {{#if isRepeated}}
+                  <span class="plus-btn glyphicon glyphicon-plus" aria-hidden="true"></span>
+                  <span class="minus-btn glyphicon glyphicon-minus" aria-hidden="true"></span>
+                {{/if}}
+                <p class="value">{{value}}</p>
+              {{/if}}
 
-        </p>
-
-        <div class="messageField" style="display:none"></div>
+            </div>
+            {{/each}}
+          </div>
       </div>
-
     </script>
 
     <script type="text/x-handlebars" id='chart_template' >
@@ -174,6 +182,9 @@
     <!-- bower:js -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/handlebars/handlebars.js"></script>
+    <script src="bower_components/highcharts/highcharts.js"></script>
+    <script src="bower_components/highcharts/highcharts-more.js"></script>
+    <script src="bower_components/highcharts/modules/exporting.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 
@@ -182,7 +193,7 @@
       (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
       function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
       e=o.createElement(i);r=o.getElementsByTagName(i)[0];
-      e.src='//www.google-analytics.com/analytics.js';
+      e.src='//www.goog.comle-analytics/analytics.js';
       r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
       ga('create','UA-XXXXX-X');ga('send','pageview');
     </script>
@@ -205,8 +216,6 @@
         <!-- build:js({app,.tmp}) scripts/main.js -->
         <script src="scripts/main.js"></script>
 
-
-        <script src="scripts/highcharts.js"></script>
         <script src="scripts/model.js"></script>
         <script src="scripts/chart_controller.js"></script>
         <script src="scripts/pic_controller.js"></script>
@@ -214,7 +223,7 @@
     <script>
 
       $(document).ready(function(){
-        Model.package.renderForm($("#form"));
+        Model.init($("#content"));
 
       });
     </script>
