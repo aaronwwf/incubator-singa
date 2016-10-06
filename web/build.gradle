@@ -1,0 +1,62 @@
+plugins {
+  id "com.moowork.grunt" version "0.10"
+}
+
+
+apply plugin:'eclipse' 
+apply plugin:'java'
+apply plugin: 'application' 
+apply plugin: "com.moowork.grunt"
+
+sourceCompatibility = 1.7
+version = '1.0'
+ 
+ 
+mainClassName = "org.apache.incubator.singa.web.Server"
+ 
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'IDAT',
+                   'Implementation-Version': version
+    }
+}
+
+task fatJar(type: Jar) {
+	manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',  
+        	'Implementation-Version': version,
+        	'Main-Class': 'sg.edu.nus.comp.idat.Server'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+ 
+ 
+ 
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.json:json:20141113'
+    compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'com.google.protobuf:protobuf-java:2.6.1' 
+}
+  
+
+task gruntBuildWithOpts(type: GruntTask) {
+   args = ["build"]
+}
+ 
+task install(dependsOn:installApp) << {
+	copy {
+		from 'build/install/'+project.name
+		into 'release'
+	}
+	copy {
+		from 'conf'
+		into 'release/conf'
+	}
+	
+} 
